@@ -26,7 +26,6 @@ class user(Base):
             'id': self.id,
             'name': self.name,
             'email': self.email,
-
             'type': self.type
         }
 

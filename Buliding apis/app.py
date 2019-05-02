@@ -27,12 +27,52 @@ def user_quizs(user_id):
     userInfo = session.query(user).filter_by(id=user_id).one()
 
     if userInfo.type == str(1):
-        getIntersted = session.query(intersted).filter_by(user_id=user_id).first()
 
         quizs = session.query(quiz).filter(intersted.interested.like('%'+quiz.field+'%'))
-        return jsonify(quizs=[q.serilize for q in quizs])
-    return 'error type'
+        if quizs != '':
+            return jsonify(quizs=[q.serilize for q in quizs])
+        else:
+            return jsonify(['no data'])
+    return jsonify(data=['Error type'])
 
+
+@app.route('/recommend/user/<int:user_id>/job')
+def recommend_company(user_id):
+    userInfo = session.query(user).filter_by(id=user_id).one()
+    if userInfo.type == str(1):
+        user_intr = session.query(intersted).filter_by(id=user_id).one()
+        all_like_intersted = session.query(intersted).filter(intersted.interested.like('%'+user_intr.interested+'%')).all()
+        for intr in all_like_intersted:
+           needed_companies = session.query(user).filter_by(id=intr.user_id).all()
+           if needed_companies != '':
+               for company in needed_companies:
+                   if(company.type == str(2)):
+
+                        return jsonify(data=[company.serilize])
+
+        else:
+            return jsonify(['no data'])
+    else:
+        return jsonify(data=['error Type'])
+
+@app.route('/recommend/company/<int:user_id>/user')
+def recommend_user(user_id):
+    userInfo = session.query(user).filter_by(id=user_id).one()
+    if userInfo.type == str(2):
+        user_intr = session.query(intersted).filter_by(id=user_id).one()
+        all_like_intersted = session.query(intersted).filter(intersted.interested.like('%'+user_intr.interested+'%')).all()
+        for intr in all_like_intersted:
+           needed_companies = session.query(user).filter_by(id=intr.user_id).all()
+           if needed_companies != '':
+               for company in needed_companies:
+                   if(company.type == str(1)):
+
+                        return jsonify(data=[company.serilize])
+
+        else:
+            return jsonify(['no data'])
+    else:
+        return jsonify(data=['error Type'])
 
 if __name__ == '__main__':
     app.secret_key = 'Super_secret_key'
